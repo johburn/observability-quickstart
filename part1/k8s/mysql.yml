@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb-config
+  namespace: applications
+data:
+  initdb.sql: |
+    CREATE DATABASE IF NOT EXISTS tutorial;
+    USE tutorial;
+    CREATE TABLE IF NOT EXISTS tutorial.people (
+        name        VARCHAR(50),
+        description VARCHAR(100),
+        PRIMARY KEY (name)
+    );
+
+    DELETE FROM tutorial.people;
+
+    INSERT INTO tutorial.people VALUES ('Iroh', 'It is important to draw wisdom from many different places');
+    INSERT INTO tutorial.people VALUES ('Sheldon','I am not insane, my mother had me tested!');
+    INSERT INTO tutorial.people VALUES ('Gregory', 'Doing things changes things. Not doing things leaves things exactly as they were.');
+    INSERT INTO tutorial.people VALUES ('Walter', "Unless you have an IQ higher than mine, I am not interested in what you think.");
+    INSERT INTO tutorial.people VALUES ('Harrison','Run Barry, Run!.');
+    INSERT INTO tutorial.people VALUES ('Dwight', 'Bread is the paper of the food industry. You write your sandwich on it.');
+  exporter.sql: |
+    CREATE USER 'exporter'@'%' IDENTIFIED BY 'exportpass';
+    GRANT PROCESS, SELECT, REPLICATION CLIENT ON *.* TO 'exporter'@'%';
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  mysql
+  namespace: applications
+  labels:
+    app:  mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app:  mysql
+    spec:
+      containers:
+      - name:  mysql
+        image:  mysql:5.7.33
+        args: ["--default-authentication-plugin=mysql_native_password"]
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: admin
+        ports:
+          - containerPort: 3306
+        volumeMounts:
+          - name: init-script
+            mountPath: /docker-entrypoint-initdb.d
+      - name:  mysql-exporter
+        image:  prom/mysqld-exporter:latest
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi
+        env:
+        - name: DATA_SOURCE_NAME
+          valueFrom:
+            secretKeyRef:
+              name: mysql-credentials
+              key: datasource
+        ports:
+          - containerPort: 9104
+      volumes:
+        - name: init-script
+          configMap:
+            name: mysql-initdb-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: applications
+  labels:
+    app: mysql
+spec:
+  selector:
+    app: mysql
+  type: ClusterIP
+  ports:
+  - name: mysql
+    port: 3306
+    protocol: TCP
+  - name: http
+    port: 9104
+    protocol: TCP

@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  creationTimestamp: null
+  namespace: observability
+  labels:
+    prometheus: example
+    role: alert-rules
+    release: prometheus
+    app: kube-prometheus-stack
+  name: prometheus-example-rules
+spec:
+  groups:
+  - name: ./example.rules
+    rules:
+    - alert: MysqlDown
+      expr: mysql_up == 0
+    - alert: MysqlJobMissing
+      expr: absent(mysql_up)
+      for: 5m

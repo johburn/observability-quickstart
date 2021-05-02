@@ -1,0 +1,153 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: people-service-depl
+  namespace: applications
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: people-service
+  template:
+    metadata:
+      labels:
+        app: people-service
+    spec:
+      containers:
+        - name: people-service
+          image: people-service:latest
+          imagePullPolicy: Never
+          ports:
+          - name: http
+            containerPort: 8080
+          env:
+            - name: SERVICE_NAME
+              value: "people-service"
+            - name: SERVER_PORT
+              value: "8080"
+            - name: LOG_FILE_NAME
+              value: "system.log"
+            - name: MYSQL_HOST
+              value: "mysql"
+            - name: MYSQL_PORT
+              value: "3306"
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: username
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: password
+            
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: people-service-svc
+  namespace: applications
+  labels:
+    app: people-service
+    monitor: prometheus
+spec:
+  selector:
+    app: people-service
+  ports:
+    - name: http
+      port: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: format-service-depl
+  namespace: applications
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: format-service
+  template:
+    metadata:
+      labels:
+        app: format-service
+    spec:
+      containers:
+        - name: format-service
+          image: format-service:latest
+          imagePullPolicy: Never
+          ports:
+          - name: http
+            containerPort: 8080
+          env:
+            - name: SERVICE_NAME
+              value: "format-service"
+            - name: SERVER_PORT
+              value: "8080"
+            - name: LOG_FILE_NAME
+              value: "system.log"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: format-service-svc
+  namespace: applications
+  labels:
+    app: format-service
+    monitor: prometheus
+spec:
+  selector:
+    app: format-service
+  ports:
+    - name: http
+      port: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-service-depl
+  namespace: applications
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello-service
+  template:
+    metadata:
+      labels:
+        app: hello-service
+    spec:
+      containers:
+        - name: hello-service
+          image: hello-service:latest
+          imagePullPolicy: Never
+          ports:
+          - name: http
+            containerPort: 8080
+          env:
+            - name: SERVICE_NAME
+              value: "hello-service"
+            - name: SERVER_PORT
+              value: "8080"
+            - name: LOG_FILE_NAME
+              value: "system.log"
+            - name: PEOPLE_SERVICE_HOST
+              value: "people-service-svc:8080"
+            - name: FORMAT_SERVICE_HOST
+              value: "format-service-svc:8080"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-service-svc
+  namespace: applications
+  labels:
+    app: hello-service
+    monitor: prometheus
+spec:
+  selector:
+    app: hello-service
+  ports:
+    - name: http
+      port: 8080
