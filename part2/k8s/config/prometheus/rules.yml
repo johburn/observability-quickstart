@@ -1,0 +1,53 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  creationTimestamp: null
+  namespace: observability
+  labels:
+    prometheus: example
+    role: alert-rules
+    release: prometheus
+    app: kube-prometheus-stack
+  name: prometheus-example-rules
+spec:
+  groups:
+  - name: database.rules
+    rules:
+    - alert: MysqlDown
+      expr: (absent(mysql_up)) == 1
+      for: 1m
+      labels:
+        severity: critical
+        namespace: observability
+      annotations:
+        description: MySQL has been down for more than a minute
+  - name: services.rules
+    rules:
+    - alert: "NotEnoughContainerReplicas"
+      expr: count by (namespace,container,job) (up{container=~".*-service"}) < 2
+      for: 30s
+      labels:
+        severity: warning
+        namespace: observability
+      annotations:
+        description: "{{ $labels.job }}: {{ $labels.container }} container hasn't had enough replicas for more than 30 seconds."
+    - alert: "ContainerNotCreating"
+      expr: kube_pod_container_status_waiting_reason{container=~".*service", reason!="ContainerCreating"} == 1
+      for: 30s
+      labels:
+        severity: critical
+        namespace: observability
+      annotations:
+        description: "{{ $labels.pod }} is not being created on namespace {{ $labels.namespace }}, reason: {{ $labels.reason}}"
+    - alert: "ContainerMemoryUsageHigh"
+      expr: (container_memory_usage_bytes{pod!=""} / (container_spec_memory_limit_bytes{pod!=""} != 0)) * 100 > 85
+      for: 5m
+      labels:
+        severity: warning
+        namespace: observability
+    - alert: "ContainerCPUUsageHigh"
+      expr: (container_memory_usage_bytes{pod!=""} / (container_spec_memory_limit_bytes{pod!=""} != 0)) * 100 > 85
+      for: 5m
+      labels:
+        severity: warning
+        namespace: observability

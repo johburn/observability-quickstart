@@ -1,0 +1,20 @@
+alertmanager:
+  templateFiles:
+    template_1.tmpl: |-
+        {{ define "__title" }}{{ range .Alerts.Firing }}{{ .Labels.alertname }}{{ end }}{{ range .Alerts.Resolved }}{{ .Labels.alertname }}{{ end }}{{ end }}
+        {{ define "alert_title" }}[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ if or (and (eq (len .Alerts.Firing) 1) (eq (len .Alerts.Resolved) 0)) (and (eq (len .Alerts.Firing) 0) (eq (len .Alerts.Resolved) 1)) }}{{ template "__title" . }}{{ end }}{{ end }}
+        {{ define "alert_description"}}
+        {{ if or (and (eq (len .Alerts.Firing) 1) (eq (len .Alerts.Resolved) 0)) (and (eq (len .Alerts.Firing) 0) (eq (len .Alerts.Resolved) 1)) }}
+        {{ range .Alerts.Firing }}{{ .Annotations.description }} *{{ .Labels.severity | toUpper }}* :chart_with_upwards_trend: *<{{ .GeneratorURL }}|Graph>*{{ end }}
+        {{ range .Alerts.Resolved }}{{ .Annotations.description }} :chart_with_upwards_trend: *<{{ .GeneratorURL }}|Graph>*{{ end }}
+        {{ else }}
+        {{ if gt (len .Alerts.Firing) 0 }}*Alerts Firing:*
+        {{ range .Alerts.Firing }}- {{ .Annotations.description }} | *{{ .Labels.severity | toUpper }}* :chart_with_upwards_trend: *<{{ .GeneratorURL }}|Graph>*
+        {{ end }}{{ end }}
+        {{ if gt (len .Alerts.Resolved) 0 }}
+        *Resolved:*
+        {{ range .Alerts.Resolved }}- {{ .Annotations.description }} :chart_with_upwards_trend: *<{{ .GeneratorURL }}|Graph>*
+        {{ end }}{{ end }}
+        {{ end }}
+        {{ end }}
+        
