@@ -4,7 +4,7 @@
   "main": "src/index.js",
   "license": "MIT",
   "scripts": {
-    "serve": "nodemon src/index.js"
+    "serve": "node src/index.js"
   },
   "dependencies": {
     "axios": "^0.21.1",
