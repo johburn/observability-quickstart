@@ -1,0 +1,8 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: jaeger-config
+  namespace: applications
+data:
+  JAEGER_HOST: simple-agent.observability.svc.cluster.local
+  JAEGER_PORT: "6832"

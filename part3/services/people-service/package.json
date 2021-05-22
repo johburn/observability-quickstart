@@ -1,0 +1,30 @@
+{
+  "name": "people-service",
+  "version": "0.0.1",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "serve": "node src/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@opentelemetry/api": "^0.18.1",
+    "@opentelemetry/core": "^0.18.0",
+    "@opentelemetry/exporter-jaeger": "^0.18.0",
+    "@opentelemetry/instrumentation": "^0.18.0",
+    "@opentelemetry/instrumentation-express": "^0.15.0",
+    "@opentelemetry/instrumentation-http": "^0.18.0",
+    "@opentelemetry/instrumentation-mysql": "^0.15.0",
+    "@opentelemetry/node": "^0.18.0",
+    "@opentelemetry/tracing": "^0.18.0",
+    "express": "^4.17.1",
+    "log4js": "^6.3.0",
+    "mysql": "^2.18.1",
+    "prom-client": "^13.1.0",
+    "promise-mysql": "^5.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}

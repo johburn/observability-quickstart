@@ -1,0 +1,26 @@
+{
+  "name": "people-service",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "license": "MIT",
+  "scripts": {
+    "serve": "node src/index.js"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^0.18.1",
+    "@opentelemetry/core": "^0.18.0",
+    "@opentelemetry/exporter-jaeger": "^0.18.0",
+    "@opentelemetry/instrumentation": "^0.18.0",
+    "@opentelemetry/instrumentation-express": "^0.15.0",
+    "@opentelemetry/instrumentation-http": "^0.18.0",
+    "@opentelemetry/node": "^0.18.0",
+    "@opentelemetry/tracing": "^0.18.0",
+    "axios": "^0.21.1",
+    "express": "^4.17.1",
+    "log4js": "^6.3.0",
+    "prom-client": "^13.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}

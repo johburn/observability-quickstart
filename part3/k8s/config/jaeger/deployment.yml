@@ -1,0 +1,20 @@
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: simple
+  namespace: observability
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger-service
+  namespace: observability
+spec:
+  selector:
+    app: jaeger
+  type: NodePort
+  ports:
+  - name: http
+    port: 16686
+    targetPort: 16686
+    nodePort: 30007
